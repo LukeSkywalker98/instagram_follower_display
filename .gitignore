@@ -1,0 +1,14 @@
+# Python runtime artefacts
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+env/
+.venv/
+
+# VS Code workspace files
+.vscode/
+*.code-workspace
+
+# Secrets – never commit
+.env
