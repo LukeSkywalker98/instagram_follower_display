@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Instagram Follower Ticker</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap"
+      rel="stylesheet">
+
+<style>
+  /* ----- Global reset ----- */
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  html, body {
+    height:100%;
+    font-family:'Montserrat',sans-serif;
+    background:linear-gradient(135deg,#9b59b6,#e91e63);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+  }
+
+  /* ----- Card container ----- */
+  .card {
+    display:flex;
+    align-items:center;
+    gap:2.5rem;                     /* more breathing room */
+    background:rgba(0,0,0,0.2);
+    border-radius:12px;
+    padding:1.8rem 2.2rem;
+    backdrop-filter:blur(8px);
+    animation:fadeIn 0.9s ease-out forwards;
+    opacity:0;
+    /* Width strategy: max‑width caps extreme stretch, width:80vw lets it grow on midsize screens */
+    max-width:720px;
+    width:80vw;
+  }
+  @keyframes fadeIn { to { opacity:1; } }
+
+  /* ----- Left side – Instagram logo ----- */
+  .logo {
+    flex-shrink:0;
+    width:120px;                 /* larger than before */
+    height:120px;
+  }
+  .logo img {
+    width:100%; height:100%;
+    object-fit:contain;
+  }
+
+  /* ----- Center – Count + timestamp ----- */
+  .center {
+    text-align:center;
+    min-width:180px;             /* prevent collapse on very narrow windows */
+  }
+  #count {
+    font-size:3.6rem;            /* a tad bigger */
+    font-weight:700;
+    line-height:1;
+  }
+  .updated {
+    font-size:0.9rem;
+    opacity:0.85;
+    margin-top:0.35rem;
+  }
+
+  /* ----- Right side – Avatar + username ----- */
+  .profile {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:0.45rem;
+  }
+  .avatar {
+    width:100px;                 /* larger avatar */
+    height:100px;
+    border-radius:50%;
+    overflow:hidden;
+    border:2px solid #fff;
+  }
+  .avatar img { width:100%; height:100%; object-fit:cover; }
+  .username {
+    font-size:1.05rem;
+    font-weight:400;
+    letter-spacing:0.4px;
+  }
+</style>
+</head>
+
+<body>
+<div class="card">
+  <!-- Instagram logo (high‑res optional srcset) -->
+  <div class="logo">
+    <img src="instagram_logo.png"
+         srcset="instagram_logo.png 1x, instagram_logo200.png 2x"
+         alt="Instagram logo">
+  </div>
+
+  <!-- Live count + last‑update -->
+  <div class="center">
+    <div id="count">–</div>
+    <div class="updated" id="updated">Loading…</div>
+  </div>
+
+  <!-- Avatar + username -->
+  <div class="profile">
+    <div class="avatar">
+      <img src="gf_avatar.png"
+           srcset="gf_avatar.png 1x, gf_avatar200.png 2x"
+           alt="Girlfriend avatar">
+    </div>
+    <div class="username">@martaveegas</div>
+  </div>
+</div>
+
+<script>
+/* ----- Polling script (unchanged from previous version) ----- */
+function msJitter(baseMs, jitterMs = 2000) {
+  return baseMs + Math.floor(Math.random() * jitterMs) - Math.floor(jitterMs / 2);
+}
+async function refresh() {
+  try {
+    const r = await fetch('/followers');
+    const d = await r.json();
+    if (d.followers !== undefined) {
+      document.getElementById('count').textContent = d.followers.toLocaleString();
+      const now = new Date();
+      const opts = { hour: '2-digit', minute: '2-digit', second: '2-digit',
+                     day: 'numeric', month: 'short', year: 'numeric' };
+      document.getElementById('updated').textContent =
+        `Last update: ${now.toLocaleString(undefined, opts)}`;
+    }
+  } catch (e) {
+    console.error('Fetch error:', e);
+    document.getElementById('updated').textContent = 'Error loading data';
+  }
+}
+refresh();
+function scheduleNext() {
+  const delay = msJitter(30_000);
+  setTimeout(() => {
+    refresh().finally(scheduleNext);
+  }, delay);
+}
+scheduleNext();
+</script>
+</body>
+</html>
