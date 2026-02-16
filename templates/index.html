@@ -90,10 +90,12 @@
 
 <body>
 <div class="card">
-  <!-- Instagram logo (high‑res optional srcset) -->
+  <!-- Instagram logo with srcset -->
+  {% set logo_1x = url_for('static', filename='instagram_logo.png') %}
+  {% set logo_2x = url_for('static', filename='instagram_logo200.png') %}
   <div class="logo">
-    <img src="instagram_logo.png"
-         srcset="instagram_logo.png 1x, instagram_logo200.png 2x"
+    <img src="{{ logo_1x }}"
+         srcset="{{ logo_1x }} 1x, {{ logo_2x }} 2x"
          alt="Instagram logo">
   </div>
 
@@ -104,10 +106,12 @@
   </div>
 
   <!-- Avatar + username -->
+  {% set avatar_1x = url_for('static', filename='gf_avatar.png') %}
+  {% set avatar_2x = url_for('static', filename='gf_avatar200.png') %}
   <div class="profile">
     <div class="avatar">
-      <img src="gf_avatar.png"
-           srcset="gf_avatar.png 1x, gf_avatar200.png 2x"
+      <img src="{{ avatar_1x }}"
+           srcset="{{ avatar_1x }} 1x, {{ avatar_2x }} 2x"
            alt="Girlfriend avatar">
     </div>
     <div class="username">@martaveegas</div>

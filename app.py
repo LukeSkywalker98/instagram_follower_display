@@ -2,9 +2,11 @@
 import os
 import time
 import requests
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template, send_from_directory
 from dotenv import load_dotenv
+import threading, time, sdnotify
 
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 # ----------------------------------------------------------------------
 # Load environment variables (expects a .env file in the same directory)
 # ----------------------------------------------------------------------
@@ -60,9 +62,30 @@ def followers():
             return jsonify(error=str(exc)), 502
     return jsonify(followers=_cache["value"])
 
+# -------------------------------------------------
+# NEW: Render the Jinja template for the UI
+# -------------------------------------------------
+@app.route("/")
+def home():
+    """
+    Flask will look for `templates/index.html` and render it.
+    All `{{ url_for('static', ...) }}` expressions inside the file
+    will be resolved automatically.
+    """
+    return render_template("index.html")
+
 # ----------------------------------------------------------------------
 # Development entry point
 # ----------------------------------------------------------------------
+
 if __name__ == "__main__":
     # Debug mode is convenient locally; disable for production.
     app.run(host="0.0.0.0", port=5000, debug=True)
+
+def watchdog():
+    n = sdnotify.SystemdNotifier()
+    while True:
+        n.notify('WATCHDOG=1')
+        time.sleep(10)   # must be < WatchdogSec (30 s)
+
+threading.Thread(target=watchdog, daemon=True).start()
